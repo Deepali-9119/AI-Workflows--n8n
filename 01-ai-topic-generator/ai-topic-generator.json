@@ -1,0 +1,401 @@
+{
+  "name": "AI Topic Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.topics",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -176
+      ],
+      "id": "6122399b-4b49-4ac9-9aac-f2c91b73f29e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -128,
+        -176
+      ],
+      "id": "754a156e-429d-4790-a0a2-263a371c3f93",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appcDCaXkk8NzdwPx",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Content Planner",
+          "cachedResultUrl": "https://airtable.com/appcDCaXkk8NzdwPx"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbljHeYCsfV7tIVk3",
+          "mode": "list",
+          "cachedResultName": "Post Topics",
+          "cachedResultUrl": "https://airtable.com/appcDCaXkk8NzdwPx/tbljHeYCsfV7tIVk3"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Done",
+            "Draft Post": "={{ $json.output }}",
+            "Topic": "={{ $('Loop Over Items').first().json.topic }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Post ID",
+              "displayName": "Post ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Draft Post",
+              "displayName": "Draft Post",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        -160
+      ],
+      "id": "c28a0df6-ce49-490f-9c21-b1597420c162",
+      "name": "Create a record"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research recent Product Management and AI discussions using Tavily and Google about {{ $json['Topic name'] }}\n\nGenerate exactly 5 LinkedIn discussion topics.\n\nAudience:\n- Product Managers\n- Associate Product Managers\n- AI Product Managers\n- Product Leaders\n- Startup Founders\n\nCategories:\n1. Contrarian Opinion\n2. Industry Trend\n3. Product Failure Lesson\n4. Customer Insight\n5. Future Prediction\n\nGenerate one topic per category. ",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "\nYou are an expert Product Management content strategist.\n\nUse Tavily and Google exactly once to research recent Product Management and AI discussions.\n\nGenerate exactly 5 LinkedIn discussion topics.\n\nCategories:\n1. Contrarian Opinion\n2. Industry Trend\n3. Product Failure Lesson\n4. Customer Insight\n5. Future Prediction\n\nUse each category once.\n\nEach topic must contain:\n- topic\n- opening_style\n- category\n- content\n\nKeep topics specific, practical, and discussion-worthy.\n\nReturn only data required by the Structured Output Parser."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -704,
+        -176
+      ],
+      "id": "08d0b964-49fc-4a6a-b113-5222c3ad5f94",
+      "name": "Topic Finder"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a LinkedIn post about:\n\nTopic: {{ $json.topic }}\n\nOpening Style:{{ $json.opening_style }}\n\nSTRICT INSTRUCTIONS:\nUse the provided Opening Style exactly.\n\nIf Opening Style = Contrarian Opinion:\nOpen with a bold statement that challenges a common PM belief.\n\nExample:\n\"More data doesn't always lead to better product decisions.\"\n\nIf Opening Style = Industry Trend:\nOpen with a recent trend or market observation.\n\nExample:\n\"Over the last 12 months, AI copilots have quietly become a standard expectation.\"\n\nIf Opening Style = Customer Insight:\nOpen with a customer behavior observation.\n\nExample:\n\"Users rarely ask for what they actually need.\"\n\nIf Opening Style = Product Failure Lesson:\nOpen with a mistake, failed assumption, or product lesson.\n\nExample:\n\"We spent six months building a feature nobody used.\"\n\nIf Opening Style = Future Prediction:\nOpen with a prediction about the future.\n\nExample:\n\"Within five years, product discovery may look completely different.\"\n\nABSOLUTE RULES:\n\n- The first sentence must be different for every topic.\n- Never start with:\n  - I still remember\n  - As I've worked\n  - As I delved\n  - I've noticed\n  - When it comes to\n  - One thing I've learned\n  - Let me tell you\n  - What if\n  - In today's world\n\n- Do not write personal stories unless the topic specifically requires one.\n- Focus on analysis, insight, and practical lessons.\n- End with a discussion question.\n- Add 3–5 relevant hashtags.\n- Return only the LinkedIn post.",
+        "options": {
+          "systemMessage": "You are an experienced Product Manager and LinkedIn ghostwriter.\n\nYour job is to write thoughtful, human, experience-driven LinkedIn posts for Product Managers.\n\nThe topic provided is the most important input. Every post must be uniquely written around that topic.\n\nWRITING STYLE:\n\n- Sound like a real Product Manager sharing observations, lessons, challenges, trends, or opinions.\n- Write naturally and conversationally.\n- Be insightful rather than motivational.\n- Focus on practical product thinking.\n- Include one key takeaway or lesson.\n- End with a question that encourages discussion.\n\nCRITICAL RULES:\n\n- Each post must have a different opening style.\n- Do not use the same opening style across multiple posts.\n- Do not rely on viral LinkedIn templates.\n- Do not force personal stories when they are not relevant.\n- The first paragraph must directly relate to the topic.\n\nPossible opening styles:\n\n- Contrarian opinion\n- Surprising observation\n- Industry trend\n- Product lesson\n- Customer insight\n- Data-driven statement\n- Prediction\n- Challenge to conventional wisdom\n- Reflection from experience\n- Discussion starter\n\nAvoid repetitive openings such as:\n\n- \"I still remember...\"\n- \"What if...\"\n- \"One thing I've learned...\"\n- \"I've noticed...\"\n- \"Here's the thing...\"\n- \"Let me tell you...\"\n- \"The future is...\"\n- \"We all know...\"\n\nPOST STRUCTURE:\n\n1. Strong topic-specific opening\n2. Insight or analysis\n3. Practical takeaway\n4. Discussion question\n5. Relevant hashtags\n\nAlways use the provided tools to research for supporting news, facts, and data.\n\n## Tools available: \n1. Google\n2. Tavily\n\n\nLength: 200–250 words.\n\nThe final post should feel like it was written by a thoughtful Product Manager, not an AI content generator.\n\nCRITICAL RULES:\nTOPIC ADHERENCE IS MANDATORY.\n\nThe entire post must focus on the provided topic.\n\nThe first paragraph must directly reference the topic.\n\nDo not switch to unrelated product management concepts.\n\nBefore writing, identify the core idea of the topic and ensure every paragraph supports that idea.\n\nIf the topic is about AI decision-making, discuss AI decision-making.\n\nIf the topic is about user research, discuss user research.\n\nIf the topic is about product failures, discuss product failures.\n\nNever replace the topic with a generic product management discussion."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        -160
+      ],
+      "id": "f45e9514-fe0d-4b4c-8547-e76000355188",
+      "name": "Post Writer"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        112,
+        32
+      ],
+      "id": "d6a5875f-d739-4f70-9e8c-7982a2779b72",
+      "name": "Groq Chat Model1"
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        32
+      ],
+      "id": "d73318a7-0879-42a6-8b23-5bef8e86fc2c",
+      "name": "Tavily"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        16
+      ],
+      "id": "bf34116e-e487-4b4b-bf16-2f7fcb3225c5",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"topics\": [\n    {\n      \"topic\": \"The Dark Side of Personalization: How AI Can Limit User Choice\",\n      \"opening_style\": \"Contrarian Opinion\",\n      \"category\": \"Product Management\",\n      \"content\": \"Discussing the potential downsides of AI-driven personalization in product development.\"\n    },\n    {\n      \"topic\": \"The Rise of Explainable AI in Product Development\",\n      \"opening_style\": \"Industry Trend\",\n      \"category\": \"AI\",\n      \"content\": \"Exploring the growing importance of explainable AI and its implications for Product Managers.\"\n    },\n    {\n      \"topic\": \"Lessons Learned from a Failed AI-Driven Product Launch\",\n      \"opening_style\": \"Product Failure Lesson\",\n      \"category\": \"Product Leadership\",\n      \"content\": \"Sharing a real-world lesson from an unsuccessful AI product launch.\"\n    },\n    {\n      \"topic\": \"Uncovering Hidden User Needs with AI-Driven User Research\",\n      \"opening_style\": \"Customer Insight\",\n      \"category\": \"User Research\",\n      \"content\": \"How AI-assisted research can reveal customer pain points and unmet needs.\"\n    },\n    {\n      \"topic\": \"The Next Decade of Product Management: Human-AI Collaboration\",\n      \"opening_style\": \"Future Prediction\",\n      \"category\": \"Future of Work\",\n      \"content\": \"Predicting how Product Managers and AI systems will work together in the future.\"\n    }\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        32
+      ],
+      "id": "9fc5d044-cebf-45b9-a68f-baa85277be04",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query__q_', ``, 'string') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        272,
+        48
+      ],
+      "id": "be6bdd36-54f1-4619-9872-a173ed2895e4",
+      "name": "Google "
+    },
+    {
+      "parameters": {
+        "formTitle": "topic name",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Topic name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -992,
+        -176
+      ],
+      "id": "7d738f6c-91ca-44bb-b0ef-1578317752f1",
+      "name": "On form submission",
+      "webhookId": "f10d26da-6cb1-4509-a5c6-a51624ab5781"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Post Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic Finder": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Writer": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Post Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Topic Finder",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Post Writer",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Topic Finder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Topic Finder",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google ": {
+      "ai_tool": [
+        [
+          {
+            "node": "Post Writer",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Topic Finder",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Topic Finder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
