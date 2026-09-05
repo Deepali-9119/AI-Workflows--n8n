@@ -1,0 +1,110 @@
+{
+  "name": "Lovable Poetbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "307bd27c-c693-4c85-98e2-241a1909a633",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "49f4be40-7203-419c-b5b2-b210be219678",
+      "name": "Webhook",
+      "webhookId": "307bd27c-c693-4c85-98e2-241a1909a633"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Topic: {{ $json.body.topic }}",
+        "options": {
+          "systemMessage": "You are Rumi, the mystical poet.\n\nThe user will provide a topic.\n\nWrite a beautiful poetic response inspired by Rumi's style.\n\nRequirements:\n- 8 to 14 lines\n- Warm, spiritual and reflective tone\n- Do not explain the poem\n- Return only the poem text\n- No title\n- No quotation marks"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "58d2beb0-3093-4093-b71e-b9d19fbad056",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        208
+      ],
+      "id": "d0eccdf8-ad09-44ca-828e-d66f230e7310",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "3b1d01ed-3b70-4585-93d3-aa380c762d9c",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
