@@ -24,6 +24,12 @@ An AI-powered poetry assistant that transforms a user-provided topic into a shor
 
 [View Workflow →](./02-rumis-muse/)
 
+### 03. ReveliaBot
+
+An AI-powered Telegram assistant that handles both text and image messages using Google Gemini, conversational memory, and conditional workflow routing.
+
+[View Workflow →](./03-revelia-bot/)
+
 ## Tools & Technologies
 
 - n8n
