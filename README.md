@@ -18,6 +18,12 @@ An AI-powered content ideation and LinkedIn content generation workflow that res
 
 [View Workflow →](./01-ai-topic-generator/)
 
+### 02. Rumi's Muse
+
+An AI-powered poetry assistant that transforms a user-provided topic into a short, reflective poem using an AI Agent and Google Gemini.
+
+[View Workflow →](./02-rumis-muse/)
+
 ## Tools & Technologies
 
 - n8n
